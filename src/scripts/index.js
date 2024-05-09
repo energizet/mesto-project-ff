@@ -1,26 +1,56 @@
 import '../pages/index.css';
 import {initialCards} from './cards';
+import {onLike, createCard, removeCard} from "./components/card";
+import {openPopup} from "./components/modal";
 
 const cardTemplate = document.querySelector("#card-template").content.querySelector('.card');
 const placesList = document.querySelector(".places__list");
+const popupCardImages = document.querySelector('.popup_type_image');
 
-function createCard(item, removeCard) {
-    const card = cardTemplate.cloneNode(true);
-    const cardTitle = card.querySelector('.card__title');
-    const cardImage = card.querySelector('.card__image');
-    const cardDeleteButton = card.querySelector('.card__delete-button');
+placesList.append(...initialCards.map(item =>
+    createCard(cardTemplate, item, removeCard, onLike, popupCardImages)));
 
-    cardTitle.textContent = item.name;
-    cardImage.src = item.link;
-    cardImage.alt = item.name;
+toOpenPopupEdit();
+toOpenPopupAdd();
 
-    cardDeleteButton.addEventListener('click', () => removeCard(card));
+function toOpenPopupEdit() {
+    const profileTitle = document.querySelector('.profile__title');
+    const profileDescription = document.querySelector('.profile__description');
 
-    return card;
+    const profileEdit = document.querySelector('.profile__edit-button');
+    const popupProfileEdit = document.querySelector('.popup_type_edit');
+
+    const popupProfileTitle = popupProfileEdit.querySelector('.popup__input_type_name');
+    const popupProfileDescription = popupProfileEdit.querySelector('.popup__input_type_description');
+
+    profileEdit.addEventListener('click', () => {
+        popupProfileTitle.value = profileTitle.textContent;
+        popupProfileDescription.value = profileDescription.textContent;
+
+        openPopup(popupProfileEdit, () => {
+            profileTitle.textContent = popupProfileTitle.value;
+            profileDescription.textContent = popupProfileDescription.value;
+        });
+    });
 }
 
-function removeCard(card) {
-    card.remove();
+function toOpenPopupAdd() {
+    const profileAdd = document.querySelector('.profile__add-button');
+    const popupProfileAdd = document.querySelector('.popup_type_new-card');
+
+    const cardName = popupProfileAdd.querySelector('.popup__input_type_card-name');
+    const cardUrl = popupProfileAdd.querySelector('.popup__input_type_url');
+
+    profileAdd.addEventListener('click', () => {
+        cardName.value = '';
+        cardUrl.value = '';
+
+        openPopup(popupProfileAdd, () => {
+            placesList.prepend(createCard(cardTemplate, {
+                name: cardName.value,
+                link: cardUrl.value,
+            }, removeCard, onLike, popupCardImages));
+        });
+    });
 }
 
-placesList.append(...initialCards.map(item => createCard(item, removeCard)));
