@@ -1,5 +1,5 @@
 export function openPopupFabric(popup) {
-    closePopupByCross(popup, () => closePopup());
+    closePopupByCross();
     popup.addEventListener('mousedown', closePopupByOverlay);
 
     return () => {
