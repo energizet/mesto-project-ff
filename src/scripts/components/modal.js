@@ -1,38 +1,34 @@
-export function openPopup(popup, submit = null) {
-    popup.classList.add('popup_is-opened');
+export function openPopupFabric(popup) {
+    closePopupByCross(popup, () => closePopup());
+    popup.addEventListener('mousedown', closePopupByOverlay);
 
-    const popupForm = popup.querySelector('.popup__form');
+    return () => {
+        popup.classList.add('popup_is-opened');
 
-    document.addEventListener('keyup', onPopupClose);
-    popupForm?.addEventListener('submit', submitForm);
+        document.addEventListener('keyup', closePopupByEsc);
 
-    const popupContent = popup.querySelector('.popup__content');
-    const popupClose = popup.querySelector('.popup__close');
+        return closePopup;
+    };
 
-    popupContent.addEventListener('click', e => e.stopPropagation());
-    popupClose.addEventListener('click', () => closePopup(popup, onPopupClose, popupForm, submitForm));
+    function closePopupByOverlay(e) {
+        if (e.currentTarget === e.target) {
+            closePopup();
+        }
+    }
 
-    popup.addEventListener('click', () => closePopup(popup, onPopupClose, popupForm, submitForm));
-
-    function onPopupClose(e) {
+    function closePopupByEsc(e) {
         if (e.code === 'Escape') {
-            closePopup(popup, onPopupClose, popupForm, submitForm);
+            closePopup();
         }
     }
 
-    function submitForm(e) {
-        e.preventDefault();
-
-        if (submit instanceof Function) {
-            submit();
-        }
-
-        closePopup(popup, onPopupClose, popupForm, submitForm);
+    function closePopupByCross() {
+        const popupClose = popup.querySelector('.popup__close');
+        popupClose.addEventListener('click', closePopup);
     }
-}
 
-export function closePopup(popup, onPopupClose, popupForm, submitForm) {
-    popup.classList.remove('popup_is-opened');
-    document.removeEventListener('keyup', onPopupClose);
-    popupForm?.removeEventListener('submit', submitForm);
+    function closePopup() {
+        popup.classList.remove('popup_is-opened');
+        document.removeEventListener('keyup', closePopupByEsc);
+    }
 }
