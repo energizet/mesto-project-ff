@@ -23,19 +23,15 @@ registerEditPopup();
 registerAddPopup();
 
 function createCardProxy(cardData) {
-    const card = createCard(cardTemplate, cardData, {removeCard, like});
+    return createCard(cardTemplate, cardData, {removeCard, like, openCard});
+}
 
-    const cardImage = card.querySelector('.card__image');
+function openCard(cardData) {
+    popupCaption.textContent = cardData.name;
+    popupImage.src = cardData.link;
+    popupImage.alt = cardData.name;
 
-    cardImage.addEventListener('click', () => {
-        popupCaption.textContent = cardData.name;
-        popupImage.src = cardData.link;
-        popupImage.alt = cardData.name;
-
-        openPopupCard();
-    });
-
-    return card;
+    openPopupCard();
 }
 
 function registerEditPopup() {

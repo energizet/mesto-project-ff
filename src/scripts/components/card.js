@@ -15,6 +15,7 @@ export function createCard(cardTemplate, cardData, events) {
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
 
+    cardImage.addEventListener('click', () => events.openCard(cardData));
     cardDeleteButton.addEventListener('click', () => events.removeCard(card));
     cardLikeButton.addEventListener('click', () => events.like(cardLikeButton));
 
