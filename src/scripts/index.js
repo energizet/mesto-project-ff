@@ -2,6 +2,7 @@ import '../pages/index.css';
 import {initialCards} from './cards';
 import {like, createCard, removeCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
+import {clearValidation, enableValidation} from "./components/validation";
 
 const cardTemplate = document.querySelector("#card-template").content.querySelector('.card');
 const placesList = document.querySelector(".places__list");
@@ -17,10 +18,20 @@ const openPopupCard = openPopupFabric(popupCardImage);
 const openPopupEdit = openPopupFabric(popupProfileEdit);
 const openPopupAdd = openPopupFabric(popupProfileAdd);
 
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+};
+
 placesList.append(...initialCards.map(item => createCardProxy(item)));
 
 registerEditPopup();
 registerAddPopup();
+
+enableValidation(validationConfig);
 
 function createCardProxy(cardData) {
     return createCard(cardTemplate, cardData, {removeCard, like, openCard});
@@ -52,6 +63,7 @@ function registerEditPopup() {
         popupProfileTitle.value = profileTitle.textContent;
         popupProfileDescription.value = profileDescription.textContent;
 
+        clearValidation(popupProfileEdit, validationConfig);
         closePopup = openPopupEdit();
     });
 
@@ -75,6 +87,7 @@ function registerAddPopup() {
 
     profileAdd.addEventListener('click', () => {
         form.reset();
+        clearValidation(popupProfileAdd, validationConfig);
         closePopup = openPopupAdd();
     });
 
