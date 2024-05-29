@@ -52,6 +52,25 @@ export function updateProfile(profile) {
     }).catch(err => console.log(err));
 }
 
+export function updateAvatar(profile) {
+    return fetch(`${process.env.BASE_URL}/users/me/avatar`, {
+        method: 'PATCH',
+        headers: {
+            authorization: process.env.API_TOKEN,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            avatar: profile.avatar,
+        }),
+    }).then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+
+        return Promise.reject(`Ошибка: ${res.status}`);
+    }).catch(err => console.log(err));
+}
+
 export function addCard(card) {
     return fetch(`${process.env.BASE_URL}/cards`, {
         method: 'POST',

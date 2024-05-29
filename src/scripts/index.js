@@ -2,7 +2,7 @@ import '../pages/index.css';
 import {createCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
 import {clearValidation, enableValidation} from "./validation";
-import {addCard, deleteCard, deleteLike, getCards, getProfile, setLike, updateProfile} from './api';
+import {addCard, deleteCard, deleteLike, getCards, getProfile, setLike, updateAvatar, updateProfile} from './api';
 
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
@@ -14,6 +14,8 @@ const placesList = document.querySelector(".places__list");
 const popupCardImage = document.querySelector('.popup_type_image');
 const popupProfileEdit = document.querySelector('.popup_type_edit');
 const popupProfileAdd = document.querySelector('.popup_type_new-card');
+const popupAvatar = document.querySelector('.popup_type_avatar');
+const popupDeleteCard = document.querySelector('.popup_type_delete-card');
 
 const popupCaption = popupCardImage.querySelector('.popup__caption');
 const popupImage = popupCardImage.querySelector('.popup__image');
@@ -21,6 +23,8 @@ const popupImage = popupCardImage.querySelector('.popup__image');
 const openPopupCard = openPopupFabric(popupCardImage);
 const openPopupEdit = openPopupFabric(popupProfileEdit);
 const openPopupAdd = openPopupFabric(popupProfileAdd);
+const openPopupAvatar = openPopupFabric(popupAvatar);
+const openPopupDeleteCard = openPopupFabric(popupDeleteCard);
 
 const validationConfig = {
     formSelector: '.popup__form',
@@ -35,12 +39,11 @@ const [profile, cards] = await Promise.all([
     getCards(),
 ]);
 
-profileTitle.textContent = profile.name;
-profileDescription.textContent = profile.about;
-profileImage.style.backgroundImage = `url('${profile.avatar}')`;
+setProfile();
 
 placesList.append(...cards.map(item => createCardProxy(item)));
 
+registerAvatarPopup();
 registerEditPopup();
 registerAddPopup();
 
@@ -100,13 +103,49 @@ function openCard(cardData) {
     openPopupCard();
 }
 
+function registerAvatarPopup() {
+    const popupAvatarLink = popupAvatar.querySelector('.popup__input_type_url');
+    const popupButton = popupAvatar.querySelector('.popup__button');
+    const buttonDefaultText = popupButton.textContent;
+
+    const popupForm = popupAvatar.querySelector('.popup__form');
+
+    let closePopup;
+    popupForm.addEventListener('submit', e => submitForm(e, submit, closePopup));
+
+    profileImage.addEventListener('click', () => {
+        popupForm.reset();
+
+        clearValidation(popupAvatar, validationConfig);
+        closePopup = openPopupAvatar();
+    });
+
+    async function submit() {
+        popupButton.textContent = 'Сохранение...';
+
+        const updatedProfile = await updateAvatar({
+            avatar: popupAvatarLink.value,
+        });
+
+        popupButton.textContent = buttonDefaultText;
+
+        if (updatedProfile == null) {
+            return;
+        }
+
+        Object.assign(profile, updatedProfile);
+
+        setProfile();
+    }
+}
+
 function registerEditPopup() {
     const profileEdit = document.querySelector('.profile__edit-button');
 
     const popupProfileTitle = popupProfileEdit.querySelector('.popup__input_type_name');
     const popupProfileDescription = popupProfileEdit.querySelector('.popup__input_type_description');
-    const popupProfileButton = popupProfileEdit.querySelector('.popup__button');
-    const buttonDefaultText = popupProfileButton.textContent;
+    const popupButton = popupProfileEdit.querySelector('.popup__button');
+    const buttonDefaultText = popupButton.textContent;
 
     const popupForm = popupProfileEdit.querySelector('.popup__form');
 
@@ -122,14 +161,14 @@ function registerEditPopup() {
     });
 
     async function submit() {
-        popupProfileButton.textContent = 'Сохранение...';
+        popupButton.textContent = 'Сохранение...';
 
         const updatedProfile = await updateProfile({
             name: popupProfileTitle.value,
             about: popupProfileDescription.value,
         });
 
-        popupProfileButton.textContent = buttonDefaultText;
+        popupButton.textContent = buttonDefaultText;
 
         if (updatedProfile == null) {
             return;
@@ -137,19 +176,17 @@ function registerEditPopup() {
 
         Object.assign(profile, updatedProfile);
 
-        profileTitle.textContent = profile.name;
-        profileDescription.textContent = profile.about;
+        setProfile();
     }
 }
 
 function registerAddPopup() {
     const profileAdd = document.querySelector('.profile__add-button');
-    const form = popupProfileAdd.querySelector('form');
 
     const cardName = popupProfileAdd.querySelector('.popup__input_type_card-name');
     const cardUrl = popupProfileAdd.querySelector('.popup__input_type_url');
-    const cardButton = popupProfileAdd.querySelector('.popup__button');
-    const buttonDefaultText = cardButton.textContent;
+    const popupButton = popupProfileAdd.querySelector('.popup__button');
+    const buttonDefaultText = popupButton.textContent;
 
     const popupForm = popupProfileAdd.querySelector('.popup__form');
 
@@ -157,20 +194,20 @@ function registerAddPopup() {
     popupForm.addEventListener('submit', e => submitForm(e, submit, closePopup));
 
     profileAdd.addEventListener('click', () => {
-        form.reset();
+        popupForm.reset();
         clearValidation(popupProfileAdd, validationConfig);
         closePopup = openPopupAdd();
     });
 
     async function submit() {
-        cardButton.textContent = 'Сохранение...';
+        popupButton.textContent = 'Сохранение...';
 
         const card = await addCard({
             name: cardName.value,
             link: cardUrl.value,
         });
 
-        cardButton.textContent = buttonDefaultText;
+        popupButton.textContent = buttonDefaultText;
 
         if (card == null) {
             return;
@@ -178,6 +215,12 @@ function registerAddPopup() {
 
         placesList.prepend(createCardProxy(card));
     }
+}
+
+function setProfile() {
+    profileTitle.textContent = profile.name;
+    profileDescription.textContent = profile.about;
+    profileImage.style.backgroundImage = `url('${profile.avatar}')`;
 }
 
 async function submitForm(e, submit, closePopup) {
