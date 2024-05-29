@@ -15,6 +15,8 @@ export function createCard(cardTemplate, cardData, events) {
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
 
+    cardLikeButton.textContent = cardData.likes.length;
+
     if (cardData.isLike) {
         cardLikeButton.classList.add('card__like-button_is-active');
     }
