@@ -51,3 +51,23 @@ export function UpdateProfile(profile) {
         return Promise.reject(`Ошибка: ${res.status}`);
     }).catch(err => console.log(err));
 }
+
+export function AddCard(card) {
+    return fetch(`${process.env.BASE_URL}/cards`, {
+        method: 'POST',
+        headers: {
+            authorization: process.env.API_TOKEN,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: card.name,
+            link: card.link,
+        })
+    }).then(res => {
+        if (res.ok) {
+            return res.json();
+        }
+
+        return Promise.reject(`Ошибка: ${res.status}`);
+    }).catch(err => console.log(err));
+}

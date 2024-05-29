@@ -2,7 +2,7 @@ import '../pages/index.css';
 import {like, createCard, removeCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
 import {clearValidation, enableValidation} from "./validation";
-import {GetCards, GetProfile, UpdateProfile} from './api';
+import {AddCard, GetCards, GetProfile, UpdateProfile} from './api';
 
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
@@ -34,8 +34,6 @@ const [profile, cards] = await Promise.all([
     GetProfile(),
     GetCards(),
 ]);
-
-profile._id = 'c85011613b4e17f9e8a92fe9';
 
 profileTitle.textContent = profile.name;
 profileDescription.textContent = profile.about;
@@ -111,7 +109,7 @@ function registerAddPopup() {
 
     const cardName = popupProfileAdd.querySelector('.popup__input_type_card-name');
     const cardUrl = popupProfileAdd.querySelector('.popup__input_type_url');
-    const cardButton = popupProfileEdit.querySelector('.popup__button');
+    const cardButton = popupProfileAdd.querySelector('.popup__button');
     const buttonDefaultText = cardButton.textContent;
 
     const popupForm = popupProfileAdd.querySelector('.popup__form');
@@ -125,16 +123,21 @@ function registerAddPopup() {
         closePopup = openPopupAdd();
     });
 
-    function submit() {
+    async function submit() {
         cardButton.textContent = 'Сохранение...';
 
+        const card = await AddCard({
+            name: cardName.value,
+            link: cardUrl.value,
+        });
 
         cardButton.textContent = buttonDefaultText;
 
-        placesList.prepend(createCardProxy({
-            name: cardName.value,
-            link: cardUrl.value,
-        }));
+        if (card == null) {
+            return;
+        }
+
+        placesList.prepend(createCardProxy(card));
     }
 }
 
