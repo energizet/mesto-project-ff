@@ -1,7 +1,3 @@
-export function like(cardLikeButton) {
-    cardLikeButton.classList.toggle('card__like-button_is-active');
-}
-
 export function createCard(cardTemplate, cardData, events) {
     const card = cardTemplate.cloneNode(true);
 
@@ -15,23 +11,29 @@ export function createCard(cardTemplate, cardData, events) {
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
 
-    cardLikeButton.textContent = cardData.likes.length;
+    like();
 
-    if (cardData.isLike) {
-        cardLikeButton.classList.add('card__like-button_is-active');
-    }
-
-    if (cardData.isCanDelete){
+    if (cardData.isCanDelete) {
         cardDeleteButton.classList.add('card__delete-button_visible');
     }
 
     cardImage.addEventListener('click', () => events.openCard(cardData));
-    cardDeleteButton.addEventListener('click', () => events.removeCard(card));
-    cardLikeButton.addEventListener('click', () => events.like(cardLikeButton));
+    cardDeleteButton.addEventListener('click', events.removeCard);
+    cardLikeButton.addEventListener('click', events.like);
 
-    return card;
+    return [card, removeCard, like];
+
+    function removeCard() {
+        card.remove();
+    }
+
+    function like() {
+        if (cardData.isLike) {
+            cardLikeButton.classList.add('card__like-button_is-active');
+        } else {
+            cardLikeButton.classList.remove('card__like-button_is-active');
+        }
+        cardLikeButton.textContent = cardData.likeCount;
+    }
 }
 
-export function removeCard(card) {
-    card.remove();
-}

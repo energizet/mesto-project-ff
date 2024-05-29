@@ -1,8 +1,8 @@
 import '../pages/index.css';
-import {like, createCard, removeCard} from "./components/card";
+import {createCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
 import {clearValidation, enableValidation} from "./validation";
-import {AddCard, GetCards, GetProfile, UpdateProfile} from './api';
+import {addCard, deleteCard, deleteLike, getCards, getProfile, setLike, updateProfile} from './api';
 
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
@@ -31,8 +31,8 @@ const validationConfig = {
 };
 
 const [profile, cards] = await Promise.all([
-    GetProfile(),
-    GetCards(),
+    getProfile(),
+    getCards(),
 ]);
 
 profileTitle.textContent = profile.name;
@@ -47,10 +47,49 @@ registerAddPopup();
 enableValidation(validationConfig);
 
 function createCardProxy(cardData) {
-    cardData.isLike = cardData.likes.some(user => user._id === profile._id);
+    updateLike();
     cardData.isCanDelete = cardData.owner._id === profile._id;
 
-    return createCard(cardTemplate, cardData, {removeCard, like, openCard});
+    const [card, removeCard, like] = createCard(cardTemplate, cardData, {
+        removeCard: removeCardProxy,
+        like: likeProxy,
+        openCard,
+    });
+
+    return card;
+
+    async function removeCardProxy() {
+        const res = await deleteCard(cardData);
+
+        if (res == null) {
+            return;
+        }
+
+        removeCard();
+    }
+
+    async function likeProxy() {
+        let card;
+        if (cardData.isLike) {
+            card = await deleteLike(cardData);
+        } else {
+            card = await setLike(cardData);
+        }
+
+        if (card == null) {
+            return;
+        }
+
+        Object.assign(cardData, card);
+
+        updateLike();
+        like();
+    }
+
+    function updateLike() {
+        cardData.isLike = cardData.likes.some(user => user._id === profile._id);
+        cardData.likeCount = cardData.likes.length;
+    }
 }
 
 function openCard(cardData) {
@@ -85,7 +124,7 @@ function registerEditPopup() {
     async function submit() {
         popupProfileButton.textContent = 'Сохранение...';
 
-        const updatedProfile = await UpdateProfile({
+        const updatedProfile = await updateProfile({
             name: popupProfileTitle.value,
             about: popupProfileDescription.value,
         });
@@ -126,7 +165,7 @@ function registerAddPopup() {
     async function submit() {
         cardButton.textContent = 'Сохранение...';
 
-        const card = await AddCard({
+        const card = await addCard({
             name: cardName.value,
             link: cardUrl.value,
         });
