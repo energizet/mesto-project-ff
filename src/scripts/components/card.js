@@ -15,6 +15,14 @@ export function createCard(cardTemplate, cardData, events) {
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
 
+    if (cardData.isLike) {
+        cardLikeButton.classList.add('card__like-button_is-active');
+    }
+
+    if (cardData.isCanDelete){
+        cardDeleteButton.classList.add('card__delete-button_visible');
+    }
+
     cardImage.addEventListener('click', () => events.openCard(cardData));
     cardDeleteButton.addEventListener('click', () => events.removeCard(card));
     cardLikeButton.addEventListener('click', () => events.like(cardLikeButton));

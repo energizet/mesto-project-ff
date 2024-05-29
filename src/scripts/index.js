@@ -1,8 +1,12 @@
 import '../pages/index.css';
-import {initialCards} from './cards';
 import {like, createCard, removeCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
-import {clearValidation, enableValidation} from "./components/validation";
+import {clearValidation, enableValidation} from "./validation";
+import {GetCards, GetMe} from './api';
+
+const profileTitle = document.querySelector('.profile__title');
+const profileDescription = document.querySelector('.profile__description');
+const profileImage = document.querySelector('.profile__image');
 
 const cardTemplate = document.querySelector("#card-template").content.querySelector('.card');
 const placesList = document.querySelector(".places__list");
@@ -26,7 +30,16 @@ const validationConfig = {
     errorClass: 'popup__error_visible'
 };
 
-placesList.append(...initialCards.map(item => createCardProxy(item)));
+const [me, cards] = await Promise.all([
+    GetMe(),
+    GetCards(),
+]);
+
+profileTitle.textContent = me.name;
+profileDescription.textContent = me.about;
+profileImage.style.backgroundImage = `url('${me.avatar}')`;
+
+placesList.append(...cards.map(item => createCardProxy(item)));
 
 registerEditPopup();
 registerAddPopup();
@@ -34,6 +47,9 @@ registerAddPopup();
 enableValidation(validationConfig);
 
 function createCardProxy(cardData) {
+    cardData.isLike = cardData.likes.some(user => user._id === me._id);
+    cardData.isCanDelete = cardData.owner._id === me._id;
+
     return createCard(cardTemplate, cardData, {removeCard, like, openCard});
 }
 
