@@ -1,14 +1,13 @@
 import '../pages/index.css';
 import {createCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
-import {clearValidation, enableValidation, showInputError} from "./validation";
+import {clearValidation, enableValidation} from "./validation";
 import {
     addCard,
     deleteCard,
     deleteLike,
     getCards,
     getProfile,
-    checkImage,
     setLike,
     updateAvatar,
     updateProfile
@@ -94,7 +93,8 @@ function registerDeleteCardPopup() {
 }
 
 function createCardProxy(cardData) {
-    updateLike();
+    cardData.isLike = cardData.likes.some(user => user._id === profile._id);
+    cardData.likeCount = cardData.likes.length;
     cardData.isCanDelete = cardData.owner._id === profile._id;
 
     const [card, removeCard, like] = createCard(cardTemplate, cardData, {
@@ -121,15 +121,11 @@ function createCardProxy(cardData) {
             return;
         }
 
+        card.isLike = card.likes.some(user => user._id === profile._id);
+        card.likeCount = card.likes.length;
         Object.assign(cardData, card);
 
-        updateLike();
         like();
-    }
-
-    function updateLike() {
-        cardData.isLike = cardData.likes.some(user => user._id === profile._id);
-        cardData.likeCount = cardData.likes.length;
     }
 }
 
@@ -162,13 +158,6 @@ function registerAvatarPopup() {
         popupButton.textContent = 'Сохранение...';
 
         const link = popupAvatarLink.value;
-        const isImage = await checkImage(link);
-
-        if (isImage === false) {
-            showInputError(popupForm, popupAvatarLink, popupAvatarLink.dataset.errorMessage, validationConfig);
-            popupButton.textContent = buttonDefaultText;
-            return false;
-        }
 
         const updatedProfile = await updateAvatar({
             avatar: link,
@@ -250,13 +239,6 @@ function registerAddPopup() {
         popupButton.textContent = 'Сохранение...';
 
         const link = cardUrl.value;
-        const isImage = (await checkImage(link)) ?? false;
-
-        if (isImage === false) {
-            showInputError(popupForm, cardUrl, cardUrl.dataset.errorMessage, validationConfig);
-            popupButton.textContent = buttonDefaultText;
-            return false;
-        }
 
         const card = await addCard({
             name: cardName.value,

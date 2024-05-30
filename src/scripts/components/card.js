@@ -11,7 +11,7 @@ export function createCard(cardTemplate, cardData, events) {
     cardImage.src = cardData.link;
     cardImage.alt = cardData.name;
 
-    like();
+    like(cardData, cardLikeButton);
 
     if (cardData.isCanDelete) {
         cardDeleteButton.classList.add('card__delete-button_visible');
@@ -21,19 +21,19 @@ export function createCard(cardTemplate, cardData, events) {
     cardDeleteButton.addEventListener('click', events.removeCard);
     cardLikeButton.addEventListener('click', events.like);
 
-    return [card, removeCard, like];
+    return [card, () => removeCard(card), () => like(cardData, cardLikeButton)];
 
-    function removeCard() {
-        card.remove();
-    }
-
-    function like() {
-        if (cardData.isLike) {
-            cardLikeButton.classList.add('card__like-button_is-active');
-        } else {
-            cardLikeButton.classList.remove('card__like-button_is-active');
-        }
-        cardLikeButton.textContent = cardData.likeCount;
-    }
 }
 
+function removeCard(card) {
+    card.remove();
+}
+
+function like(cardData, cardLikeButton) {
+    if (cardData.isLike) {
+        cardLikeButton.classList.add('card__like-button_is-active');
+    } else {
+        cardLikeButton.classList.remove('card__like-button_is-active');
+    }
+    cardLikeButton.textContent = cardData.likeCount;
+}

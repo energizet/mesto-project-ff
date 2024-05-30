@@ -3,13 +3,7 @@ export function getProfile() {
         headers: {
             authorization: process.env.API_TOKEN,
         },
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => {
+    }).then(checkResponse).catch(err => {
         console.log(err);
         return {};
     });
@@ -20,13 +14,7 @@ export function getCards() {
         headers: {
             authorization: process.env.API_TOKEN,
         },
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => {
+    }).then(checkResponse).catch(err => {
         console.log(err);
         return [];
     });
@@ -43,13 +31,7 @@ export function updateProfile(profile) {
             name: profile.name,
             about: profile.about,
         }),
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
 export function updateAvatar(profile) {
@@ -62,13 +44,7 @@ export function updateAvatar(profile) {
         body: JSON.stringify({
             avatar: profile.avatar,
         }),
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
 export function addCard(card) {
@@ -82,13 +58,7 @@ export function addCard(card) {
             name: card.name,
             link: card.link,
         }),
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
 export function deleteCard(card) {
@@ -97,13 +67,7 @@ export function deleteCard(card) {
         headers: {
             authorization: process.env.API_TOKEN,
         },
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
 export function setLike(card) {
@@ -112,13 +76,7 @@ export function setLike(card) {
         headers: {
             authorization: process.env.API_TOKEN,
         },
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
 export function deleteLike(card) {
@@ -127,23 +85,13 @@ export function deleteLike(card) {
         headers: {
             authorization: process.env.API_TOKEN,
         },
-    }).then(res => {
-        if (res.ok) {
-            return res.json();
-        }
-
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    }).then(checkResponse).catch(err => console.log(err));
 }
 
-export function checkImage(url) {
-    return fetch(url, {
-        method: 'HEAD'
-    }).then(res => {
-        if (res.ok) {
-            return res.headers.get('content-type')?.startsWith('image/');
-        }
+function checkResponse(res) {
+    if (res.ok) {
+        return res.json();
+    }
 
-        return Promise.reject(`Ошибка: ${res.status}`);
-    }).catch(err => console.log(err));
+    return Promise.reject(`Ошибка: ${res.status}`);
 }
