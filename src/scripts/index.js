@@ -24,7 +24,7 @@ const openPopupCard = openPopupFabric(popupCardImage);
 const openPopupEdit = openPopupFabric(popupProfileEdit);
 const openPopupAdd = openPopupFabric(popupProfileAdd);
 const openPopupAvatar = openPopupFabric(popupAvatar);
-const openPopupDeleteCard = openPopupFabric(popupDeleteCard);
+const openPopupDeleteCard = registerDeleteCardPopup();
 
 const validationConfig = {
     formSelector: '.popup__form',
@@ -49,6 +49,40 @@ registerAddPopup();
 
 enableValidation(validationConfig);
 
+function registerDeleteCardPopup() {
+    const openPopupDeleteCard = openPopupFabric(popupDeleteCard);
+    const popupButton = popupDeleteCard.querySelector('.popup__button');
+    const buttonDefaultText = popupButton.textContent;
+
+    const popupForm = popupDeleteCard.querySelector('.popup__form');
+
+    let closePopup;
+    let cardData;
+    let removeCard;
+
+    popupForm.addEventListener('submit', e => submitForm(e, submit, closePopup));
+
+    return (card, remove) => {
+        closePopup = openPopupDeleteCard();
+        cardData = card;
+        removeCard = remove;
+    };
+
+    async function submit() {
+        popupButton.textContent = 'Сохранение...';
+
+        const res = await deleteCard(cardData);
+
+        popupButton.textContent = buttonDefaultText;
+
+        if (res == null) {
+            return;
+        }
+
+        removeCard();
+    }
+}
+
 function createCardProxy(cardData) {
     updateLike();
     cardData.isCanDelete = cardData.owner._id === profile._id;
@@ -61,14 +95,8 @@ function createCardProxy(cardData) {
 
     return card;
 
-    async function removeCardProxy() {
-        const res = await deleteCard(cardData);
-
-        if (res == null) {
-            return;
-        }
-
-        removeCard();
+    function removeCardProxy() {
+        openPopupDeleteCard(cardData, removeCard);
     }
 
     async function likeProxy() {
