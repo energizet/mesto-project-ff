@@ -1,8 +1,18 @@
 import '../pages/index.css';
 import {createCard} from "./components/card";
 import {openPopupFabric} from "./components/modal";
-import {clearValidation, enableValidation} from "./validation";
-import {addCard, deleteCard, deleteLike, getCards, getProfile, setLike, updateAvatar, updateProfile} from './api';
+import {clearValidation, enableValidation, showInputError} from "./validation";
+import {
+    addCard,
+    deleteCard,
+    deleteLike,
+    getCards,
+    getProfile,
+    checkImage,
+    setLike,
+    updateAvatar,
+    updateProfile
+} from './api';
 
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
@@ -151,8 +161,17 @@ function registerAvatarPopup() {
     async function submit() {
         popupButton.textContent = 'Сохранение...';
 
+        const link = popupAvatarLink.value;
+        const isImage = await checkImage(link);
+
+        if (isImage === false) {
+            showInputError(popupForm, popupAvatarLink, popupAvatarLink.dataset.errorMessage, validationConfig);
+            popupButton.textContent = buttonDefaultText;
+            return false;
+        }
+
         const updatedProfile = await updateAvatar({
-            avatar: popupAvatarLink.value,
+            avatar: link,
         });
 
         popupButton.textContent = buttonDefaultText;
@@ -230,9 +249,18 @@ function registerAddPopup() {
     async function submit() {
         popupButton.textContent = 'Сохранение...';
 
+        const link = cardUrl.value;
+        const isImage = (await checkImage(link)) ?? false;
+
+        if (isImage === false) {
+            showInputError(popupForm, cardUrl, cardUrl.dataset.errorMessage, validationConfig);
+            popupButton.textContent = buttonDefaultText;
+            return false;
+        }
+
         const card = await addCard({
             name: cardName.value,
-            link: cardUrl.value,
+            link: link,
         });
 
         popupButton.textContent = buttonDefaultText;
@@ -253,7 +281,11 @@ function setProfile() {
 
 async function submitForm(e, submit, closePopup) {
     e.preventDefault();
-    await submit();
+    const isClose = (await submit()) ?? true;
+
+    if (isClose === false) {
+        return;
+    }
 
     if (closePopup instanceof Function) {
         closePopup();

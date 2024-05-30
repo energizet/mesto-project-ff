@@ -135,3 +135,15 @@ export function deleteLike(card) {
         return Promise.reject(`Ошибка: ${res.status}`);
     }).catch(err => console.log(err));
 }
+
+export function checkImage(url) {
+    return fetch(url, {
+        method: 'HEAD'
+    }).then(res => {
+        if (res.ok) {
+            return res.headers.get('content-type')?.startsWith('image/');
+        }
+
+        return Promise.reject(`Ошибка: ${res.status}`);
+    }).catch(err => console.log(err));
+}

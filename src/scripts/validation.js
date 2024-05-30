@@ -6,7 +6,7 @@ const toggleButtonState = (inputList, buttonElement) => {
     buttonElement.disabled = hasInvalidInput(inputList);
 }
 
-const showInputError = (formElement, inputElement, errorMessage, config) => {
+export const showInputError = (formElement, inputElement, errorMessage, config) => {
     const errorElement = formElement.querySelector(`.${inputElement.name}_error`);
     inputElement.classList.add(config.inputErrorClass);
     errorElement.textContent = errorMessage;
